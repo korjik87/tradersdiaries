@@ -12,10 +12,11 @@ class ETHBTCPriceHistory extends BinancePriceHistory
     /**
      * @throws Exception
      */
-    function __construct(float $lastPrice, float $openTime)
+    function __construct(float|string $lastPrice, int $openTime)
     {
 
-        $this::$curentTime = new DateTime($openTime);
+        $this::$curentTime = $this::timestampToDateTime($openTime/1000);
+
         $this->checkDataIsBad();
         $this->addPrice($lastPrice, $openTime);
     }
@@ -26,22 +27,34 @@ class ETHBTCPriceHistory extends BinancePriceHistory
     public function checkDataIsBad(): void
     {
         if ($this->isOldDateMinPrice()) {
-            $this->minPriceDate = $this->getTime($this->findMinPriceHistory()['time']);
+            $min = $this->findMinPriceHistory();
+            if($min !== null) {
+                $this->minPriceDate = $this->getTime( $this::timestampToDateTime($min['time']));
+            }
         }
 
         if ($this->isOldDateMaxPrice()) {
-            $this->minPriceDate = $this->getTime($this->findMaxPriceHistory()['time']);
+            $max = $this->findMaxPriceHistory();
+            if($max !== null) {
+                $this->minPriceDate = $this->getTime($this::timestampToDateTime($max['time']));
+            }
         }
     }
 
-    public function findMinPriceHistory(): DateTime|null
+    public function findMinPriceHistory(): array|null
     {
-        return max(array_keys($this->historyPrices, min($this->historyPrices)));
+        if($this->historyPrices) {
+            return max(array_keys($this->historyPrices, min($this->historyPrices)));
+        }
+        return null;
     }
 
-    public function findMaxPriceHistory(): DateTime|null
+    public function findMaxPriceHistory(): array|null
     {
-        return max(array_keys($this->historyPrices, max($this->historyPrices)));
+        if($this->historyPrices) {
+            return max(array_keys($this->historyPrices, max($this->historyPrices)));
+        }
+        return null;
     }
 
     public function getMinPriceHistory(): float|null
@@ -64,7 +77,7 @@ class ETHBTCPriceHistory extends BinancePriceHistory
         }
     }
 
-    public function addPrice(float $lastPrice, float $openTime): array
+    public function addPrice(float|string $lastPrice, int $openTime): array
     {
         $this->historyPrices[$this->getTime($this::$curentTime)] = ['price' => $lastPrice, 'time' => $openTime];
         $this->updateMinPrice($lastPrice, $openTime);
@@ -77,7 +90,7 @@ class ETHBTCPriceHistory extends BinancePriceHistory
         return $dateTime->format('H:i:s');
     }
 
-    public function updateMinPrice(float $price, float $openTime)
+    public function updateMinPrice(float $price, int $openTime)
     {
         if ($this->minPriceDate == null) {
             $this->minPriceDate = $this->getTime($this::$curentTime);
@@ -86,7 +99,7 @@ class ETHBTCPriceHistory extends BinancePriceHistory
         }
     }
 
-    public function updateMaxPrice(float $price, float $openTime)
+    public function updateMaxPrice(float $price, int $openTime)
     {
         if ($this->maxPriceDate == null) {
             $this->maxPriceDate = $this->getTime($this::$curentTime);
@@ -95,15 +108,21 @@ class ETHBTCPriceHistory extends BinancePriceHistory
         }
     }
 
+
+    public static function timestampToDateTime(int $timestamp): DateTime
+    {
+        return (new DateTime())->setTimestamp($timestamp);
+    }
+
     /**
      * @throws Exception
      */
     public function isOldDateMinPrice(): bool
     {
         if ($this->minPriceDate) {
-            return (new DateTime($this->historyPrices[$this->minPriceDate]['time']))->diff($this::$curentTime)->days > 0;
+            return ($this::timestampToDateTime($this->historyPrices[$this->minPriceDate]['time']))->diff($this::$curentTime)->days > 0;
         } else {
-            return true;
+            return false;
         }
     }
 
@@ -113,9 +132,9 @@ class ETHBTCPriceHistory extends BinancePriceHistory
     public function isOldDateMaxPrice(): bool
     {
         if ($this->maxPriceDate) {
-            return (new DateTime($this->historyPrices[$this->maxPriceDate]['time']))->diff($this::$curentTime)->days > 0;
+            return $this::timestampToDateTime($this->historyPrices[$this->maxPriceDate]['time'])->diff($this::$curentTime)->days > 0;
         } else {
-            return true;
+            return false;
         }
     }
 
