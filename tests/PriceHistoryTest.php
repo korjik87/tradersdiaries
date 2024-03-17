@@ -54,7 +54,7 @@ class PriceHistoryTest extends TestCase
         foreach ($data2 as $item) {
             $out[] =  [
                 'lastPrice' => $item->lastPrice,
-                'openTime' => (int)($item->openTime/1000),
+                'openTime' => (int)($item->openTime/100),
                 'last' => false ,
                 'last2' => false,
 
