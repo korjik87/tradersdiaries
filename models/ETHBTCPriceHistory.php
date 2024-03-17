@@ -16,10 +16,6 @@ class ETHBTCPriceHistory extends BinancePriceHistory
     {
         $this->recoveryHistory();
         $this->curentTime = $this::timestampToDateTime($openTime);
-//        print_r($openTime);
-//        print_r($this::timestampToDateTime($openTime));
-//        print_r($this->curentTime);
-
         $this->checkDataIsBad();
         $this->addPrice($lastPrice, $openTime);
     }
@@ -51,6 +47,7 @@ class ETHBTCPriceHistory extends BinancePriceHistory
     public function checkDataIsBad(): void
     {
         if ($this->isOldDateMinPrice()) {
+            unset($this->historyPrices[$this->minPriceDate]);
             $min = $this->findMinPriceHistory();
             if($min !== null) {
                 $this->minPriceDate = $min;
@@ -58,9 +55,10 @@ class ETHBTCPriceHistory extends BinancePriceHistory
         }
 
         if ($this->isOldDateMaxPrice()) {
+            unset($this->historyPrices[$this->maxPriceDate]);
             $max = $this->findMaxPriceHistory();
             if($max !== null) {
-                $this->minPriceDate = $max;
+                $this->maxPriceDate = $max;
             }
         }
     }
@@ -143,7 +141,20 @@ class ETHBTCPriceHistory extends BinancePriceHistory
     public function isOldDateMinPrice(): bool
     {
         if ($this->minPriceDate && $this->historyPrices[$this->minPriceDate]['time']) {
-            return ($this::timestampToDateTime($this->historyPrices[$this->minPriceDate]['time']))->diff($this->curentTime)->days > 0;
+
+            $days = ($this::timestampToDateTime($this->historyPrices[$this->minPriceDate]['time']))->diff($this->curentTime)->format("%a")/24;
+
+//            if($days >= 1) {
+//                var_dump(($this::timestampToDateTime($this->historyPrices[$this->minPriceDate]['time']))->getTimestamp());
+//                var_dump(($this::timestampToDateTime($this->historyPrices[$this->minPriceDate]['time'])));
+//                var_dump($this->curentTime);
+//                var_dump($this->curentTime->getTimestamp());
+//                exit();
+//            } else {
+//                var_dump(0);
+//            }
+
+            return $days >= 1;
         } else {
             return false;
         }
@@ -155,7 +166,8 @@ class ETHBTCPriceHistory extends BinancePriceHistory
     public function isOldDateMaxPrice(): bool
     {
         if ($this->maxPriceDate && $this->historyPrices[$this->maxPriceDate]['time']) {
-            return $this::timestampToDateTime($this->historyPrices[$this->maxPriceDate]['time'])->diff($this->curentTime)->days > 0;
+            $days = $this::timestampToDateTime($this->historyPrices[$this->maxPriceDate]['time'])->diff($this->curentTime)->format("%a")/24 >= 1;
+            return $days >= 1;
         } else {
             return false;
         }
