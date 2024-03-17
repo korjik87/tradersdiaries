@@ -1,12 +1,16 @@
 <?php
 
 use models\ETHBTCPriceHistory;
+//use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 
 class PriceHistoryTest extends TestCase
 {
+    /**
+     * @dataProvider providePriceHistoryFirstDay
+     * @throws Exception
+     */
     #[DataProvider('providePriceHistoryFirstDay')]
     public function testPrice($lastPrice, $openTime): void
     {
@@ -23,13 +27,21 @@ class PriceHistoryTest extends TestCase
 
         $data = json_decode(file_get_contents(__DIR__ . '/../test12032024.json'));
 
-print_r($data[0]);
+        $out = [];
+        foreach ($data as $item) {
+            $out[] =  [
+                'lastPrice' => $item->lastPrice,
+                'openTime' => $item->openTime,
+            ];
+        }
 
         return [
-            [
-                'lastPrice' => "0.05461000",
-                'openTime' => 1710262614420,
-            ],
+            $out[0], $out[1]
+        ];
+
+
+        return [
+            $out[0], $out[1]
         ];
     }
 
