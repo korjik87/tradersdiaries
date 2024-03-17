@@ -28,10 +28,6 @@ class ETHBTCPriceHistory extends BinancePriceHistory
 
 
 
-
-
-
-
     public function recoveryHistory(): void {
         if(file_exists(ETHBTCPriceHistory::NAME_FILE_HISTORY)) {
             $h = json_decode(file_get_contents(ETHBTCPriceHistory::NAME_FILE_HISTORY), true);
