@@ -15,7 +15,7 @@ class ETHBTCPriceHistory extends BinancePriceHistory
     function __construct(float|string $lastPrice, int $openTime)
     {
         $this->recoveryHistory();
-        $this->curentTime = $this::timestampToDateTime($openTime/100);
+        $this->curentTime = $this::timestampToDateTime($openTime);
 //        print_r($openTime);
 //        print_r($this::timestampToDateTime($openTime));
 //        print_r($this->curentTime);
@@ -23,6 +23,17 @@ class ETHBTCPriceHistory extends BinancePriceHistory
         $this->checkDataIsBad();
         $this->addPrice($lastPrice, $openTime);
     }
+
+
+    public function getCurrentTime(): int
+    {
+        return $this->curentTime->getTimestamp();
+    }
+
+
+
+
+
 
 
     public function recoveryHistory(): void {
@@ -94,7 +105,6 @@ class ETHBTCPriceHistory extends BinancePriceHistory
     {
         $this->historyPrices[$this->getTime($this->curentTime)] = ['price' => $lastPrice, 'time' => $openTime];
 
-        var_dump('addPrice');
         $this->updateMinPrice($lastPrice, $openTime);
         $this->updateMaxPrice($lastPrice, $openTime);
         return $this->historyPrices;
@@ -102,16 +112,14 @@ class ETHBTCPriceHistory extends BinancePriceHistory
 
     public function getTime(DateTime $dateTime): string
     {
-        return $dateTime->format('H:i:s');
+        return $dateTime->format('H:i:s.u');
     }
 
     public function updateMinPrice(float $price, int $openTime)
     {
         if ($this->minPriceDate === null) {
-            var_dump('updateMinPrice bad');
             $this->minPriceDate = $this->getTime($this->curentTime);
         } else {
-            var_dump('updateMinPrice');
             $this->minPriceDate = $this->getMinPriceHistory() > $price ? $this->getTime($this->timestampToDateTime($openTime)) : $this->minPriceDate;
         }
     }
@@ -121,8 +129,6 @@ class ETHBTCPriceHistory extends BinancePriceHistory
         if ($this->maxPriceDate === null) {
             $this->maxPriceDate = $this->getTime($this->curentTime);
         } else {
-
-            print_r('updateMaxPrice');
             $this->maxPriceDate = $this->getMaxPriceHistory() < $price ? $this->getTime($this->timestampToDateTime($openTime)) : $this->maxPriceDate;
         }
     }

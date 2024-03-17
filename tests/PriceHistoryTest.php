@@ -1,24 +1,29 @@
 <?php
 
 use models\ETHBTCPriceHistory;
-//use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 
 class PriceHistoryTest extends TestCase
 {
+
     /**
      * @dataProvider providePriceHistoryFirstDay
      * @throws Exception
      */
-    #[DataProvider('providePriceHistoryFirstDay')]
-    public function testPrice($lastPrice, $openTime): void
+    public function testPrice($lastPrice, int $openTime, bool $last, bool $last2): void
     {
-//        var_dump($lastPrice, $openTime);
+
         $p = new ETHBTCPriceHistory($lastPrice, $openTime);
-
-//        var_dump($p);
-
+        $this->assertEquals($openTime, $p->getCurrentTime());
+        if($last) {
+            $this->assertEquals(1128261033.0, $p->getMaxPriceHistory());
+            $this->assertEquals(0, $p->getMinPriceHistory());
+        }
+        if($last2) {
+            $this->assertEquals(1062200204.0, $p->getMaxPriceHistory());
+            $this->assertEquals(0, $p->getMinPriceHistory());
+        }
     }
 
 
@@ -26,21 +31,46 @@ class PriceHistoryTest extends TestCase
     {
         ETHBTCPriceHistory::removeHistory();
         $data = json_decode(file_get_contents(__DIR__ . '/../test12032024.json'));
+        $data = json_decode(file_get_contents(__DIR__ . '/../test15032024.json'));
+        $data2 = json_decode(file_get_contents(__DIR__ . '/../test15032024.json'));
 
         $out = [];
+        $count = count($data);
+        $count2 = count($data2);
+
         foreach ($data as $item) {
+            if($item->lastPrice) {
+                $out[] =  [
+                    'lastPrice' => $item->lastPrice,
+                    'openTime' => (int)($item->openTime/100),
+                    'last' => false ,
+                    'last2' => false,
+
+                ];
+            }
+
+        }
+
+        foreach ($data2 as $item) {
             $out[] =  [
                 'lastPrice' => $item->lastPrice,
-                'openTime' => $item->openTime,
+                'openTime' => (int)($item->openTime/1000),
+                'last' => false ,
+                'last2' => false,
+
             ];
         }
 
-        return [
-            $out[0], $out[1], $out[2]
-        ];
+        $out[$count - 1]['last'] = true;
+        $out[$count + $count2 - 2]['last2'] = true;
+
+        return $out;
 
 
 
     }
+
+
+
 
 }
