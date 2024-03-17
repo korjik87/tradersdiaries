@@ -7,18 +7,31 @@ use Exception;
 
 class ETHBTCPriceHistory extends BinancePriceHistory
 {
-
+    const NAME_FILE_HISTORY = 'history.json';
 
     /**
      * @throws Exception
      */
     function __construct(float|string $lastPrice, int $openTime)
     {
-
-        $this::$curentTime = $this::timestampToDateTime($openTime/1000);
+        $this->recoveryHistory();
+        $this->curentTime = $this::timestampToDateTime($openTime/100);
+//        print_r($openTime);
+//        print_r($this::timestampToDateTime($openTime));
+//        print_r($this->curentTime);
 
         $this->checkDataIsBad();
         $this->addPrice($lastPrice, $openTime);
+    }
+
+
+    public function recoveryHistory(): void {
+        if(file_exists(ETHBTCPriceHistory::NAME_FILE_HISTORY)) {
+            $h = json_decode(file_get_contents(ETHBTCPriceHistory::NAME_FILE_HISTORY), true);
+            $this->historyPrices = $h['historyPrices'];
+            $this->minPriceDate = $h['minPriceDate'];
+            $this->maxPriceDate = $h['maxPriceDate'];
+        }
     }
 
     /**
@@ -29,19 +42,19 @@ class ETHBTCPriceHistory extends BinancePriceHistory
         if ($this->isOldDateMinPrice()) {
             $min = $this->findMinPriceHistory();
             if($min !== null) {
-                $this->minPriceDate = $this->getTime( $this::timestampToDateTime($min['time']));
+                $this->minPriceDate = $min;
             }
         }
 
         if ($this->isOldDateMaxPrice()) {
             $max = $this->findMaxPriceHistory();
             if($max !== null) {
-                $this->minPriceDate = $this->getTime($this::timestampToDateTime($max['time']));
+                $this->minPriceDate = $max;
             }
         }
     }
 
-    public function findMinPriceHistory(): array|null
+    public function findMinPriceHistory(): string|null
     {
         if($this->historyPrices) {
             return max(array_keys($this->historyPrices, min($this->historyPrices)));
@@ -49,7 +62,7 @@ class ETHBTCPriceHistory extends BinancePriceHistory
         return null;
     }
 
-    public function findMaxPriceHistory(): array|null
+    public function findMaxPriceHistory(): string|null
     {
         if($this->historyPrices) {
             return max(array_keys($this->historyPrices, max($this->historyPrices)));
@@ -79,7 +92,9 @@ class ETHBTCPriceHistory extends BinancePriceHistory
 
     public function addPrice(float|string $lastPrice, int $openTime): array
     {
-        $this->historyPrices[$this->getTime($this::$curentTime)] = ['price' => $lastPrice, 'time' => $openTime];
+        $this->historyPrices[$this->getTime($this->curentTime)] = ['price' => $lastPrice, 'time' => $openTime];
+
+        var_dump('addPrice');
         $this->updateMinPrice($lastPrice, $openTime);
         $this->updateMaxPrice($lastPrice, $openTime);
         return $this->historyPrices;
@@ -92,19 +107,23 @@ class ETHBTCPriceHistory extends BinancePriceHistory
 
     public function updateMinPrice(float $price, int $openTime)
     {
-        if ($this->minPriceDate == null) {
-            $this->minPriceDate = $this->getTime($this::$curentTime);
+        if ($this->minPriceDate === null) {
+            var_dump('updateMinPrice bad');
+            $this->minPriceDate = $this->getTime($this->curentTime);
         } else {
-            $this->minPriceDate = $this->getMinPriceHistory() > $price ? $openTime : $this->minPriceDate;
+            var_dump('updateMinPrice');
+            $this->minPriceDate = $this->getMinPriceHistory() > $price ? $this->getTime($this->timestampToDateTime($openTime)) : $this->minPriceDate;
         }
     }
 
     public function updateMaxPrice(float $price, int $openTime)
     {
-        if ($this->maxPriceDate == null) {
-            $this->maxPriceDate = $this->getTime($this::$curentTime);
+        if ($this->maxPriceDate === null) {
+            $this->maxPriceDate = $this->getTime($this->curentTime);
         } else {
-            $this->maxPriceDate = $this->getMaxPriceHistory() < $price ? $openTime : $this->maxPriceDate;
+
+            print_r('updateMaxPrice');
+            $this->maxPriceDate = $this->getMaxPriceHistory() < $price ? $this->getTime($this->timestampToDateTime($openTime)) : $this->maxPriceDate;
         }
     }
 
@@ -114,13 +133,11 @@ class ETHBTCPriceHistory extends BinancePriceHistory
         return (new DateTime())->setTimestamp($timestamp);
     }
 
-    /**
-     * @throws Exception
-     */
+
     public function isOldDateMinPrice(): bool
     {
-        if ($this->minPriceDate) {
-            return ($this::timestampToDateTime($this->historyPrices[$this->minPriceDate]['time']))->diff($this::$curentTime)->days > 0;
+        if ($this->minPriceDate && $this->historyPrices[$this->minPriceDate]['time']) {
+            return ($this::timestampToDateTime($this->historyPrices[$this->minPriceDate]['time']))->diff($this->curentTime)->days > 0;
         } else {
             return false;
         }
@@ -131,11 +148,21 @@ class ETHBTCPriceHistory extends BinancePriceHistory
      */
     public function isOldDateMaxPrice(): bool
     {
-        if ($this->maxPriceDate) {
-            return $this::timestampToDateTime($this->historyPrices[$this->maxPriceDate]['time'])->diff($this::$curentTime)->days > 0;
+        if ($this->maxPriceDate && $this->historyPrices[$this->maxPriceDate]['time']) {
+            return $this::timestampToDateTime($this->historyPrices[$this->maxPriceDate]['time'])->diff($this->curentTime)->days > 0;
         } else {
             return false;
         }
+    }
+
+    function __destruct()
+    {
+        file_put_contents(ETHBTCPriceHistory::NAME_FILE_HISTORY,
+            json_encode(['historyPrices' => $this->historyPrices, 'maxPriceDate' => $this->maxPriceDate, 'minPriceDate' => $this->minPriceDate]));
+    }
+
+    public static function removeHistory(): void {
+        unlink(ETHBTCPriceHistory::NAME_FILE_HISTORY);
     }
 
 }

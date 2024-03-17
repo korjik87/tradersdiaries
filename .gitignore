@@ -5,3 +5,4 @@ gen
 phpunit.xml
 /vendor
 .phpunit.result.cache
+history.json

@@ -14,17 +14,17 @@ class PriceHistoryTest extends TestCase
     #[DataProvider('providePriceHistoryFirstDay')]
     public function testPrice($lastPrice, $openTime): void
     {
-        var_dump($lastPrice, $openTime);
+//        var_dump($lastPrice, $openTime);
         $p = new ETHBTCPriceHistory($lastPrice, $openTime);
 
+//        var_dump($p);
 
-        var_dump($p);
     }
 
 
     public static function providePriceHistoryFirstDay(): array
     {
-
+        ETHBTCPriceHistory::removeHistory();
         $data = json_decode(file_get_contents(__DIR__ . '/../test12032024.json'));
 
         $out = [];
@@ -36,13 +36,11 @@ class PriceHistoryTest extends TestCase
         }
 
         return [
-            $out[0], $out[1]
+            $out[0], $out[1], $out[2]
         ];
 
 
-        return [
-            $out[0], $out[1]
-        ];
+
     }
 
 }
