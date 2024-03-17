@@ -1,6 +1,10 @@
 <?php
 
-abstract  class BinancePriceHistory implements FuturesPriceHistory
+namespace models;
+
+use DateTime;
+
+abstract class BinancePriceHistory implements FuturesPriceHistory
 {
     protected array $historyPrices = [];
     protected static DateTime $curentTime;

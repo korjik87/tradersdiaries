@@ -4,3 +4,4 @@ out
 gen
 phpunit.xml
 /vendor
+.phpunit.result.cache

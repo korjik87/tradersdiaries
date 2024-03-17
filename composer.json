@@ -3,10 +3,11 @@
     "type": "test-project",
     "autoload": {
         "psr-4": {
-            "Sergey\\Traders\\": "src/"
+            "Sergey\\Traders\\": "src/",
+            "models\\": "models/"
         },
         "files": [
-            "src/ETHBTCPriceHistory.php"
+            "tests/PriceHistoryTest.php"
         ]
 
     },
@@ -20,6 +21,6 @@
         "php": "^8.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^11.0.6"
+        "phpunit/phpunit": "^11.0"
     }
 }
