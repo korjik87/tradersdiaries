@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<phpunit
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        bootstrap="common/php/tests/bootstrap.php"
+        executionOrder="random"
+>
+    <php>
+        <ini name="memory_limit" value="-1"/>
+        <ini name="display_errors" value="true"/>
+    </php>
+    <testsuites>
+        <testsuite name="Plesk Common TestSuite">
+            <directory>common/php/tests</directory>
+            <exclude>common/php/tests/stubs</exclude>
+        </testsuite>
+    </testsuites>
+    <coverage includeUncoveredFiles="true">
+    </coverage>
+</phpunit>
