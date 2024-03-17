@@ -3,4 +3,4 @@
 out
 gen
 phpunit.xml
-vendor
+/vendor
