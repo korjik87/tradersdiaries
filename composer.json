@@ -4,7 +4,11 @@
     "autoload": {
         "psr-4": {
             "Sergey\\Traders\\": "src/"
-        }
+        },
+        "files": [
+            "src/ETHBTCPriceHistory.php"
+        ]
+
     },
     "authors": [
         {
