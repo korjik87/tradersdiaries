@@ -20,14 +20,19 @@ class PriceHistoryTest extends TestCase
 
 
                 if($key === 600) {
-                    var_dump($p);
-                    var_dump($p->getMaxPriceHistory(ETHBTCPriceHistory::HISTORT_5m));
-                    var_dump($p->getMinPriceHistory(ETHBTCPriceHistory::HISTORT_5m));
 
 
-                    var_dump($p->getMaxPriceHistory(ETHBTCPriceHistory::HISTORT_15m));
-                    var_dump($p->getMinPriceHistory(ETHBTCPriceHistory::HISTORT_15m));
-                    exit();
+
+                    $this->assertEquals(110.15, $p->getMaxPriceHistory5m());
+                    $this->assertEquals(110.05, $p->getMinPriceHistory5m());
+
+
+                    $this->assertEquals(110.15, $p->getMaxPriceHistory24h());
+                    $this->assertEquals(108.78, $p->getMinPriceHistory24h());
+
+
+
+
                 }
         }
 
