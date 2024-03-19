@@ -18,8 +18,8 @@ abstract class BinancePriceHistory implements FuturesPriceHistory
 
     protected array $historyPrices = [];
     protected DateTime $curentTime;
-    public array $minPriceDate = [self::HISTORT_5m=>null, self::HISTORT_15m=>null, self::HISTORT_1h=>null,
+    protected array $minPriceDate = [self::HISTORT_5m=>null, self::HISTORT_15m=>null, self::HISTORT_1h=>null,
         self::HISTORT_4h=>null, self::HISTORT_24h=>null];
-    public array $maxPriceDate = [self::HISTORT_5m=>null, self::HISTORT_15m=>null, self::HISTORT_1h=>null,
+    protected array $maxPriceDate = [self::HISTORT_5m=>null, self::HISTORT_15m=>null, self::HISTORT_1h=>null,
         self::HISTORT_4h=>null, self::HISTORT_24h=>null];
 }
